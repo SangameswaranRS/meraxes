@@ -1,0 +1,45 @@
+/**
+ * Commodity trading network
+ */
+namespace org.example.trading
+
+asset Commodity identified by assetId {
+  o String assetId
+  o String description
+  o String mainExchange
+  o Double quantity
+  --> Trader owner
+}
+
+participant Trader identified by tradeId {
+  o String tradeId
+  o String firstName
+  o String lastName
+  o Double accountBalance
+}
+
+transaction Trade {
+  --> Commodity commodity
+  --> Trader newOwner
+}
+
+@returns(String)
+transaction MoneyTransfer{
+	o Double amountToBeTransferred
+    --> Trader transferInitTrader
+    --> Trader beneficiaryTrader
+}
+event MoneyTransferCompletionNotification{
+	-->Trader transferInitTrader
+    -->Trader beneficiaryTrader
+}
+event TradeNotification {
+  --> Commodity commodity
+}
+
+transaction RemoveHighQuantityCommodities {
+}
+
+event RemoveNotification {
+  --> Commodity commodity
+}

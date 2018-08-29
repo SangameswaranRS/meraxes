@@ -1,0 +1,72 @@
+/**
+ * Access control rules for mynetwork
+ */
+/*rule Default {
+    description: "Allow all participants access to all resources"
+    participant: "ANY"
+    operation: ALL
+    resource: "org.example.trading.*"
+    action: ALLOW
+}*/
+rule OnlyOwnersAccessTheirAssets{
+	description:"Only Owners can access their assets "
+  	participant(p): "org.example.trading.Trader"
+  	operation: ALL
+    resource(r): "org.example.trading.Commodity"
+  	condition: (r.owner.getIdentifier()==p.getIdentifier())
+  	action: ALLOW
+}
+/*rule OnlyOwnersUpdateTheirBalance{
+	description:"Only Owners are able to update their data"
+  	participant(p):"org.example.trading.Trader"
+  	operation:ALL
+    resource(r):"org.example.trading.Trader"
+  	condition: (r.getIdentifier()== t.getIdentifier())
+  	action: ALLOW
+ }*/
+rule allowEveryTraderToAlterEachOthersInfoForFacilitatingTxn{
+	description:"All owners to update each others balance - BUG #1"
+  	participant:"org.example.trading.Trader"
+  	operation:ALL
+    resource:"org.example.trading.Trader"
+  	action: ALLOW
+}
+rule EnableTradersToSubmitTradeTransactions{
+	description:"Enable Traders to submit Transactions"
+  	participant:"org.example.trading.Trader"
+  	operation:ALL
+   	resource:"org.example.trading.Trade"
+  	action:ALLOW
+}
+
+rule EnableTradersToSubmitMoneyTransferTransactions{
+	description: "Enable Traders to submit Money Transfer Transactions"
+  	participant: "org.example.trading.Trader"
+  	operation: ALL
+    resource: "org.example.trading.MoneyTransfer"
+  	action:ALLOW
+}
+
+rule SystemACL {
+    description:  "System ACL to permit all access"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
