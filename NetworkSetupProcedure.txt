@@ -1,0 +1,87 @@
+Generate Admin cards and Connection profiles for org1 and org2.
+
+INSTALL THE CHAINCODE:
+
+composer network install --card PeerAdmin@byfn-network-org1 --archiveFile meraxes@0.2.6-deploy.11.bna
+
+composer network install --card PeerAdmin@byfn-network-org2 --archiveFile meraxes@0.2.6-deploy.11.bna
+
+Create the Endorsement Policy.
+
+composer identity request -c PeerAdmin@byfn-network-org1 -u admin -s adminpw -d org1Admin
+
+composer identity request -c PeerAdmin@byfn-network-org2 -u admin -s adminpw -d org2Admin
+
+START THE BUSINESS NETWORK
+
+composer network start -c PeerAdmin@byfn-network-org1 -n meraxes -V 0.2.6-deploy.11 -o endorsementPolicyFile=/tmp/composer/endorsement-policy.json -A org1Admin -C org1Admin/admin-pub.pem -A org2Admin -C org2Admin/admin-pub.pem
+
+CREATE BUSINESS card
+
+composer card create -p /tmp/composer/org1/byfn-network-org1.json -u org1Admin -n meraxes -c org1Admin/admin-pub.pem -k org1Admin/admin-priv.pem
+
+composer card import -f org1Admin@meraxes.card
+
+test the connection 
+
+composer network ping -c org1Admin@meraxes
+
+ADD PARTICIPANT 
+
+composer participant add -c org1Admin@meraxes -d '{"$class": "org.example.trading.Trader","tradeId": "1","firstName": "Sangameswaran","lastName": "Subramanian","accountBalance": 1000}'
+
+IDENTITY ISSUE
+
+composer identity issue -c org1Admin@meraxes -f sanga.card -u sanga -a "resource:org.example.trading.Trader#1"
+
+composer card import -f sanga.card
+
+test the connection
+
+composer network ping -c sanga@meraxes
+
+ADD ASSET BELONGING TO SANGA
+
+composer transaction submit --card sanga@meraxes -d '{"$class": "org.hyperledger.composer.system.AddAsset", "targetRegistry" : "resource:org.hyperledger.composer.system.AssetRegistry#org.example.trading.Commodity", "resources": [{"$class": "org.example.trading.Commodity","assetId": "Dragons","description": "3 Dragons of Danerys Targeryan","mainExchange": "GOLD DRAGONS","quantity": 3,"owner": "resource:org.example.trading.Trader#1"}]}'
+
+composer network list -c sanga@meraxes
+
+CREATE BUSINESS NETWORK CARD FOR org2
+
+composer card create -p /tmp/composer/org2/byfn-network-org2.json -u org2Admin -n meraxes -c org2Admin/admin-pub.pem -k org2Admin/admin-priv.pem
+
+composer card import -f org2Admin@meraxes.card
+
+test the connection
+
+composer network ping -c org2Admin@meraxes
+
+ADD THE PARTICIPANT
+
+composer participant add -c org2Admin@meraxes -d '{"$class": "org.example.trading.Trader","tradeId": "2","firstName": "Danerys","lastName": "Targeryan","accountBalance": 20}'
+
+IDENTITY ISSUE
+
+composer identity issue -c org2Admin@meraxes -f dany.card -u dany -a "resource:org.example.trading.Trader#2"
+
+composer card import -f dany.card
+
+test the connection
+
+composer network ping -c dany@meraxes
+
+PLAY WITH TXNS DAWWWWWWWWW...
+
+ASSET TXNS:
+
+
+composer transaction submit --card sanga@meraxes -d '{"$class":"org.example.trading.Trade","commodity":"resource:org.example.trading.Commodity#Dragons","newOwner":"resource:org.example.trading.Trader#2"}'
+
+MONEY TXNS:
+
+composer transaction submit --card sanga@meraxes -d '{"$class": "org.example.trading.MoneyTransfer","amountToBeTransferred": 120,"transferInitTrader": "resource:org.example.trading.Trader#1","beneficiaryTrader": "resource:org.example.trading.Trader#2"}'
+
+
+
+
+
